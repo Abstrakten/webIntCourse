@@ -1,13 +1,17 @@
 
 testStr = "a rose is a rose is a rose"
 
-termList = testStr.split(' ')
+def shing(st, l):
 
-finalList = []
+    termList = st.split(' ')
 
-for (i,x) in enumerate(termList):
-    lst = termList[i:i+3]
-    if(len(lst) == 3):
-        finalList.append(termList[i:i+3])
+    finalList = set()
 
-print(finalList)
+    for (i,x) in enumerate(termList):
+        lst = termList[i:i+l]
+        if(len(lst) == l):
+            finalList.add(tuple(lst))
+
+    return finalList
+
+print(shing(testStr, 4))
