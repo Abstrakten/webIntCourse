@@ -10,7 +10,6 @@ def getPage(url):
   else:
     return None
 
-
 def checkRobot(url):
   robotUrl = getRobot(url)
   rp = urllib.robotparser.RobotFileParser()
@@ -18,7 +17,7 @@ def checkRobot(url):
   rp.read()
   return rp.can_fetch("*", url)
 
-def getRobot(url):
+def base(url):
   st = ""
   if(not (url[0:7] == "http://" or url[0:8] == "https://")):
     url = "http://" + url
@@ -28,8 +27,9 @@ def getRobot(url):
     if(x == "/"):
       i += 1
       if(i == 3):
-        return st + "robots.txt"
-  return st + "/robots.txt"
+        return st[:-1]
+  return st
 
 
-print (getPage("nobelnet.dk/"))
+def getRobot(url):
+  return base(url) + "/robots.txt"
