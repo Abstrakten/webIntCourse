@@ -7,7 +7,7 @@ import heapq
 seed = "http://www.reddit.com"
 pageCount = 1000
 backQueueCount = 0
-hitDelay = 2
+hitDelay = 1
 
 frontQueue = queue.PriorityQueue()
 backQueue = {}
@@ -36,50 +36,43 @@ def addToQueue(url):
 #         backQueue[baseUrl].append(url)
 
 def frontQueueSelector():
-  print(frontQueue.qsize())
   if(not frontQueue.empty()):
     url = frontQueue.get()[1]
     baseUrl = base(url)
     if(backQueue.get(baseUrl) == None):
-      backQueue[baseUrl] = queue.Queue().put(url)
+      backQueue[baseUrl] = queue.Queue()
+      backQueue[baseUrl].put(url)
     else:
       backQueue[baseUrl].put(url)
     if baseUrl not in backHeap:
       heapq.heappush(backHeap,(int(time.time())+hitDelay,baseUrl))
+    return True
+  return False
 
 
 def getFromBackQueue():
-  time.sleep(2)
-  if not backHeap:
+  while(not backHeap):
+    status = frontQueueSelector()
+    if(not status):
+      return None
+  target = heapq.heappop(backHeap)
+  while(target[0] > int(time.time())):
+    heapq.heappush(backHeap,target)
     frontQueueSelector()
+    target = heapq.heappop(backHeap)
+  result = backQueue.get(target[1])
+  if(not result == None):
+    result = result.get()
+  if(result == None):
+    del backQueue[target[1]]
     return getFromBackQueue()
   else:
-    target = heapq.heappop(backHeap)
-    print(target)
-    if(target[0] > int(time.time())):
-      heapq.heappush(backHeap,target)
-      frontQueueSelector()
-      return getFromBackQueue()
-    else:
-      result = backQueue.get(target[1])
-      if(not result == None):
-        result = result.get()
-      if(result == None):
-        del backQueue[target[1]]
-        return getFromBackQueue()
-      else:
-        return result
+    return result
 
 
 addToQueue(seed)
 
-currentCount = 0
-
 targetPage = getFromBackQueue()
 
 print (targetPage)
-
-#while(pageCount > currentCount):
-#  currentCount += 1
-
 
