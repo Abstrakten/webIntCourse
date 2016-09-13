@@ -3,9 +3,11 @@ from pymongo import MongoClient
 
 #Create
 
+dbName = 'crawlerDB26'
+
 def createPage(page):
   client = MongoClient()
-  db = client['crawlerDB2']
+  db = client[dbName]
   pages = db['pages']
   page_id = pages.insert_one(page).inserted_id
   client.close()
@@ -15,7 +17,7 @@ def createPage(page):
 
 def getPage(url):
   client = MongoClient()
-  db = client['crawlerDB2']
+  db = client[dbName]
   pages = db['pages']
   page = pages.find_one({"url": url})
   client.close()
@@ -30,10 +32,21 @@ def putPage(page):
   else:
     updateObj = {"$set": { 'stamp': page['stamp'], 'html': page['html'] }}
     client = MongoClient()
-    db = client['crawlerDB2']
+    db = client[dbName]
     pages = db['pages']
     pages.update_one({ "url": url }, updateObj)
     client.close()
+
+def getAllPages():
+    client = MongoClient()
+    db = client[dbName]
+    pages = db['pages']
+    pag = pages.find()
+    client.close()
+    res = []
+    for x in pag:
+      res.append(x)
+    return res
 
 #Update
 

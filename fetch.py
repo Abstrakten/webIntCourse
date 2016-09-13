@@ -1,21 +1,31 @@
 import urllib.robotparser
 import requests
+import time
 
 def getPage(url):
-  if(not url[0:4] == "http"):
-    url = "http://" + url
-  if(checkRobot(url)):
-    page = requests.get(url)
-    return page.text
-  else:
-    return None
+    try:
+      if(not url[0:4] == "http"):
+        url = "http://" + url
+      if(checkRobot(url)):
+        headers = {
+            'User-Agent': 'awsomeBot',
+        }
+        page = requests.get(url, headers=headers, timeout=5.00)
+        if(page.status_code == requests.codes.ok):
+            return page.text
+        else:
+            return None
+      else:
+        return None
+    except:
+      return None
 
 def checkRobot(url):
   robotUrl = getRobot(url)
   rp = urllib.robotparser.RobotFileParser()
   rp.set_url(robotUrl)
   rp.read()
-  return rp.can_fetch("*", url)
+  return rp.can_fetch("awsomeBot", url)
 
 def base(url):
   st = ""
@@ -30,6 +40,6 @@ def base(url):
         return st[:-1]
   return st
 
-
 def getRobot(url):
   return base(url) + "/robots.txt"
+
