@@ -3,7 +3,7 @@ import math
 import random
 
 shingleSize = 4
-hashFuncNum = 84
+sketchSize = 84
 bigPrime = 4294967311
 maxShingleID = 2**32-1
 superShingleNum = 6
@@ -11,8 +11,10 @@ superShingleSize = 14
 superShingleThreshold = 2
 
 
-randomListA = [random.randint(0, maxShingleID) for x in range(0, hashFuncNum)]
-randomListB = [random.randint(0, maxShingleID) for x in range(0, hashFuncNum)]
+randomListA = [random.randint(0, maxShingleID) for x in range(0, sketchSize
+)]
+randomListB = [random.randint(0, maxShingleID) for x in range(0, sketchSize
+)]
 
 testStr = "a rose is a rose is a rose"
 testStr2 = "rose is a rose is a rose a"
@@ -54,9 +56,11 @@ def shinglesToIntegers(shingleSet):
 def minHashVal(shingleSet):
 
     shingleIntSet = shinglesToIntegers(shingleSet)
-    resultList = [math.inf for x in range(0, hashFuncNum)]
+    resultList = [math.inf for x in range(0, sketchSize
+    )]
 
-    for i in range(0, hashFuncNum):
+    for i in range(0, sketchSize
+    ):
         a = randomListA[i]
         b = randomListB[i]
 
@@ -116,7 +120,8 @@ def checkNearDuplicate(string1, string2):
     if(superShingleThreshold > compareSuperShingle(superShingleSet1,superShingleSet2)):
         return compareSuperShingle(superShingleSet1,superShingleSet2)
 
-    return (shinglesCompare(minShingleSet1,minShingleSet2)/hashFuncNum)*100
+    return (shinglesCompare(minShingleSet1,minShingleSet2)/sketchSize
+    )*100
 
 
 
