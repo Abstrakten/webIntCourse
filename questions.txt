@@ -1,2 +1,1 @@
-Why use a heap for the backqueue, and not just a FIFO queue?
-is the backqueue populated by a seperate thread?
+Politeness on crawling subdomains?
