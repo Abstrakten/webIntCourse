@@ -12,7 +12,7 @@ backQueueCount = 0
 hitDelay = 1
 
 numThreads = 0
-maxThreads = 10
+maxThreads = 30
 threads = []
 
 frontQueue = queue.PriorityQueue()
@@ -78,7 +78,7 @@ def start():
             if((dbPage is None) or ((dbPage['stamp'] + 864000) < int(time.time()) and dbPage['canSee'])):
                 page = parseLink(targetPageUrl)
                 if(page is not None):
-                    storePage = {'stamp': int(time.time()), 'html': page['html'], 'url': targetPageUrl, 'canSee':True }
+                    storePage = {'stamp': int(time.time()), 'html': page['html'], 'url': targetPageUrl, 'canSee':True, 'terms':page['terms'], 'title': page['title'] }
                     putPage(storePage)
                     for x in page['links']:
                         addToQueue(x)
@@ -87,7 +87,7 @@ def start():
                     lock2.release()
                     print(str(backQueueCount) + ": " + targetPageUrl)
                 else:
-                    storePage = {'stamp': int(time.time()), 'html': "", 'url': targetPageUrl, 'canSee': False }
+                    storePage = {'stamp': int(time.time()), 'html': "", 'url': targetPageUrl, 'canSee': False, 'terms': [], 'title':"" }
         else:
             break
 

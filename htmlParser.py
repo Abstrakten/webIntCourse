@@ -3,8 +3,32 @@ from fetch import base
 from bs4 import BeautifulSoup
 import urltools
 import os
+from stop_words import get_stop_words
+from stemming.porter2 import stem
+import string
 
 goodFileEndings = ['html', 'htm', 'php', '', 'shtml', 'shtm', 'asp', 'php3', 'cgi']
+
+stop_words = get_stop_words('en')
+
+special = "-_,.:%&()\';#!?"
+valid = set('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') | set(special)
+
+translation_table = dict.fromkeys(map(ord, special), None)
+
+def testSpecial(s):
+    return set(s).issubset(valid)
+
+def clearHtml(html):
+    soup = BeautifulSoup(html.lower(), 'html.parser')
+    to_extract = soup.findAll(lambda tag: tag.name == "script" or tag.name == "style")
+    for item in to_extract:
+        item.extract()
+    cleanText = soup.text
+    terms = cleanText.split()
+    terms = [stem(x).translate(translation_table) for x in terms if (x not in stop_words) and testSpecial(x)]
+    return terms
+
 
 def parseLink(url): #be aware example.com is malformed 
   arr = []
@@ -22,7 +46,10 @@ def parseLink(url): #be aware example.com is malformed
           arr.append("http://" + link)
       arr2 = [urltools.normalize(x) for x in arr]
       arr3 = [transform(x) for x in arr2 if checkLinkStr(x)]
-      return {'url': url, 'html': soup.get_text(), 'links': arr3}
+      terms = clearHtml(page)
+      if(terms == None):
+          return None
+      return {'url': url, 'html': page, 'links': arr3, 'terms': terms, 'title': soup.title.text if(soup.title is not None) else "" }
   return None
 
 def checkLinkStr(url):
@@ -37,4 +64,5 @@ def transform(url):
     if(url[-1] == '/'):
         return url[:-1]
     return url
+
 

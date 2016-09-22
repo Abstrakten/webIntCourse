@@ -3,7 +3,7 @@ from pymongo import MongoClient
 
 #Create
 
-dbName = 'crawlerDB26'
+dbName = 'crawlerDB48'
 
 def createPage(page):
   client = MongoClient()
@@ -23,6 +23,13 @@ def getPage(url):
   client.close()
   return page
 
+def getPageFromId(postId):
+    client = MongoClient()
+    db = client[dbName]
+    pages = db['pages']
+    page = pages.find_one({"_id": postId})
+    client.close()
+    return page
 
 def putPage(page):
   url = page['url']
