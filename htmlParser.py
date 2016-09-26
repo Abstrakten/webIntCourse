@@ -19,14 +19,18 @@ translation_table = dict.fromkeys(map(ord, special), None)
 def testSpecial(s):
     return set(s).issubset(valid)
 
+def getTerms(s):
+    words = s.split()
+    terms = [stem(x).translate(translation_table) for x in words if (x not in stop_words) and testSpecial(x)]
+    return terms
+
 def clearHtml(html):
     soup = BeautifulSoup(html.lower(), 'html.parser')
     to_extract = soup.findAll(lambda tag: tag.name == "script" or tag.name == "style")
     for item in to_extract:
         item.extract()
     cleanText = soup.text
-    terms = cleanText.split()
-    terms = [stem(x).translate(translation_table) for x in terms if (x not in stop_words) and testSpecial(x)]
+    terms = getTerms(cleanText)
     return terms
 
 
@@ -62,7 +66,9 @@ def checkLinkStr(url):
 
 def transform(url):
     if(url[-1] == '/'):
-        return url[:-1]
+        url = url[:-1]
+    url = url.replace("https://www.", "https://")
+    url = url.replace("http://www.", "http://")
     return url
 
 
