@@ -92,14 +92,17 @@ for doc in allPages:
 transitionMatrix = (1 - alpha) * linkMatrix + numpy.full((numberOfPages, numberOfPages), alpha / numberOfPages)
 qPrev = numpy.full(numberOfPages, 1.0 / numberOfPages)
 error = math.inf
+counter = 0
 while error > errorMargin:
     qCurrent = transitionMatrix @ qPrev
     print(qCurrent)
     error = numpy.linalg.norm(qCurrent - qPrev)
     qPrev = qCurrent
+    counter += 1
 res = qPrev
 
 print("Finished the while loop")
+print(counter)
 
 # Update the database with PageRank
 invDict = {v: k for k, v in UrlToDocId.items()}

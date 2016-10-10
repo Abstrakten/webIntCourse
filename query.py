@@ -1,14 +1,5 @@
 from dbUtility import putPage, getPage, getAllPages, getPageFromId, getTerm, createTerm, putTerm
-import time
-import queue
-from fetch import base
-import heapq
-import threading
-from htmlParser import parseLink, getTerms
-from bs4 import BeautifulSoup
-from stop_words import get_stop_words
-from stemming.porter2 import stem
-from dbUtility import getPageFromId, getTerm, getPage
+from htmlParser import getTerms
 import sys
 
 def search(text):
@@ -32,7 +23,8 @@ def search(text):
             currentScore += score
             resDic[url] = currentScore
         for x,y in resDic.items():
-            resDic[x] = y/getPage(x)['docLen']
+            page = getPage(x)
+            resDic[x] = (y / page['docLen']) * page['pagerank']
         res = sorted([(y,x) for x,y in resDic.items()], reverse=True)[:5]
         return [y for x,y in res]
 
