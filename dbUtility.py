@@ -4,8 +4,8 @@ from pymongo import MongoClient
 #Create
 
 # 48 5
-dbName = 'crawlerDB51'
-termDbName = "terms7"
+dbName = 'crawlerDB'
+termDbName = "terms"
 
 client2 = MongoClient()
 db2 = client2[dbName]
@@ -96,5 +96,11 @@ def getAllPages():
     return res
 
 #Update
+def updatePage(url, updateObj):
+  client = MongoClient()
+  db = client[dbName]
+  pages = db['pages']
+  pages.update_one({ "url": url }, updateObj)
+  client.close()
 
 #Delete

@@ -1,4 +1,4 @@
-from dbUtility import putPage, getPage, getAllPages, getPageFromId, getTerm, createTerm, putTerm, replacePage
+from dbUtility import putPage, getPage, getAllPages, getPageFromId, getTerm, createTerm, putTerm, replacePage, updatePage
 import time
 import queue
 from fetch import base
@@ -9,8 +9,10 @@ from bs4 import BeautifulSoup
 from stop_words import get_stop_words
 from stemming.porter2 import stem
 import math
+import numpy
 
 dictonary = {}
+UrlToDocId = {}
 docId = 0
 
 allPages = getAllPages()
@@ -31,6 +33,7 @@ for page in allPages:
                 termObj['docFreq'] += 1
         termPosition += 1
         dictonary[term] = termObj
+    UrlToDocId[page['url']] = docId
     docId += 1
 
 for term,termObj in dictonary.items():
@@ -45,6 +48,8 @@ for term,termObj in dictonary.items():
     dictonary[term] = termObj
 
 
+numberOfPages = docId
+linkMatrix = numpy.zeros((numberOfPages, numberOfPages))
 count = 0
 for doc in allPages:
     doc['vector'] = {}
@@ -60,7 +65,47 @@ for doc in allPages:
     doc['docLen'] = docLen
     for key,value in doc['vector'].items():
         doc['vector'][key] = value / docLen
+
+    # Construct the link matrix used for calculating PageRank
+    outLinks = []
+    numberOfOutLinks = 0
+    pageId = UrlToDocId[doc['url']]
+    alpha = .10
+    errorMargin = 0.01
+    for url in doc['links']:
+        linkId = UrlToDocId.get(url, math.inf)
+        if linkId < numberOfPages:
+            outLinks.append(linkId)
+            numberOfOutLinks += 1
+    for link in outLinks:
+        linkMatrix[link, pageId] = 1.0 / numberOfOutLinks
+    if numberOfOutLinks is 0:       # Handles dead ends by random teleportation...
+        for i in range(numberOfPages):
+            linkMatrix[i, pageId] = 1.0 / numberOfPages
+    # End of link matrix construction
+
     replacePage(doc)
     count += 1
     print(count)
 
+# Adds random teleportation to the link matrix
+transitionMatrix = (1 - alpha) * linkMatrix + numpy.full((numberOfPages, numberOfPages), alpha / numberOfPages)
+qPrev = numpy.full(numberOfPages, 1.0 / numberOfPages)
+error = math.inf
+while error > errorMargin:
+    qCurrent = transitionMatrix @ qPrev
+    print(qCurrent)
+    error = numpy.linalg.norm(qCurrent - qPrev)
+    qPrev = qCurrent
+res = qPrev
+
+print("Finished the while loop")
+
+# Update the database with PageRank
+invDict = {v: k for k, v in UrlToDocId.items()}
+for i in range(numberOfPages):
+    url = invDict[i]
+    pageRank = {"$set": { 'pagerank': res[i] }}
+    updatePage(url, pageRank)
+
+print("Done updating database")
