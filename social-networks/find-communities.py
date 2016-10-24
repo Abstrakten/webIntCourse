@@ -1,7 +1,8 @@
 import networkx as nx
 from numpy.linalg import eig
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+import happyfuntokenizer
 
 color_map = {
         0:'y',
@@ -13,13 +14,13 @@ color_map = {
         6:'g',
         7:'yellow',
         8:'brown',
-            } 
+            }
 
 # Laplacian method
 def find_communities(G):
     L = nx.laplacian_matrix(G).todense()
     eig_values, eig_matrix = eig(L)
-    
+
     # find second minimum in eigen values
     second_min_idx, second_min = sorted(enumerate(eig_values), key=lambda x: x[1])[1]
 
@@ -31,7 +32,7 @@ def find_communities(G):
     for x in target_coloumn:
         x = x.real
     print(target_coloumn.shape)
-    
+
     # pair graph node with eigen vector value
     paired_target_coloumn = zip(G.nodes(), target_coloumn)
     # for x,y in (paired_target_coloumn):
@@ -44,7 +45,7 @@ def find_communities(G):
 
     km.fit(target_coloumn)
 
-    
+
     communities = {}
     for node, cluster in zip(G.nodes(), km.labels_):
         #print(color_map[cluster])
@@ -66,7 +67,7 @@ with open("friendships.txt") as inFile:
     lines = inFile.read().split("\n")
 
     data_rows = [x for x in chunks(lines, 5)]
-    
+
     # populate graph
     G = nx.Graph()
 
@@ -74,7 +75,13 @@ with open("friendships.txt") as inFile:
         name = row[0].split()[1]
         friends = row[1].split("\t")[1:]
         # summary
+        summary = row[2]
+
+
         # review
+        review = row[3]
+        sentences = review.split(".")
+        
 
         for friend in friends:
             G.add_edge(name, friend)
@@ -83,4 +90,4 @@ with open("friendships.txt") as inFile:
     print(communities)
     nx.draw_spring(G, node_color=[color_map[G.node[node]['cluster']] for node in G])
     plt.show()
-    
+
