@@ -27,33 +27,26 @@ def negate(sentence):
 def negateTokenList(tokens):
     negated = []
     for sentence in tokens:
-        negated.append(negate(sentence))
-    return negated
+        negated += negate(sentence)
+    return list(set(negated))
 
 
 
-def updateMapping(mapping, length, tokenList):
-    tokens = list(set(sum(tokenList, [])))
-    flattened = sum([[x, x + "_NEG"] for x in tokens], [])
-    for i, word in enumerate(flattened):
+def updateMapping(mapping, tokens):
+    length = len(mapping)
+    i = 0
+    for word in tokens:
         if word not in mapping:
             mapping[word] = i + length
-    return (mapping, i + length)
+            i += 1
+    return mapping
 
-
-
-def sentenceToVector(sentence, mapping, length):
-    vector = [0 for i in range(0, length)]
-    for word in sentence:
+def tokenListToVector(tokenList, mapping):
+    vector = [0 for i in range(0, len(mapping))]
+    for word in tokenList:
         i = mapping[word]
         vector[i] = 1
-    return vector
-
-def tokenListToVectors(line, mapping, length):
-    vectorList = []
-    for sentence in line:
-        vectorList.append(sentenceToVector(sentence, mapping, length))
-    return vectorList
+    return np.array(vector)
 
 
 # gnb.fit(vectorList, labels)

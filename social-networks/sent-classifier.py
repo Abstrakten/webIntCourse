@@ -11,7 +11,6 @@ with open("SentimentTrainingData.txt", "r", encoding="utf-8") as f:
     allVectors = []
     allLabels = []
     mapping = {}
-    length = 0
     reviewPrefix = "review/text: "
     labelPrefix = "review/score: "
     counter = 0
@@ -23,14 +22,18 @@ with open("SentimentTrainingData.txt", "r", encoding="utf-8") as f:
             text = line.replace(reviewPrefix, "")
             sentences = text.split(". ")
             tokens = [t.tokenize(sentence) for sentence in sentences]
-            mapping, length = classifier.updateMapping(mapping, length, tokens)
             negatedList = classifier.negateTokenList(tokens)
-            allVectors.append(classifier.tokenListToVectors(tokens, mapping, length))
+            mapping = classifier.updateMapping(mapping, negatedList)
+            sorted_list = sorted(mapping.items(), key=lambda x: x[1])
+            allVectors.append(classifier.tokenListToVector(negatedList, mapping))
             counter += 1
 
-        if counter == 10000:
+        if counter == 1000:
             print("10k reached")
-            gnb.partial_fit(allVectors,allLabels,[1,2,3,4,5])
+            x = np.array(allVectors).reshape(-1, 1)
+            y = np.array(allLabels).reshape(-1, 1)
+            gnb.partial_fit(x, y, [1, 2, 3, 4, 5])
+            print("Done partial training")
             allVectors = []
             allLabels = []
             counter = 0
